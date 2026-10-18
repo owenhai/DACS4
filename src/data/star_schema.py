@@ -456,7 +456,7 @@ def load_star_schema_to_duckdb(
 
 def build_star_schema(
     processed_dir: str = "data/processed",
-    db_path: str = "data/olist.duckdb",
+    db_path: str = "data/database/olist_analytics.duckdb",
 ) -> None:
     """Orchestrator: đọc dữ liệu đã xử lý, xây dựng Star Schema, nạp DuckDB.
 
