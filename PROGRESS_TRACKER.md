@@ -10,7 +10,7 @@
 
 | Tuần | Nội dung chính | Trạng thái | Hoàn thành |
 |:----:|----------------|:----------:|:----------:|
-| 1 | Thu thập & Xử lý dữ liệu, Star Schema, DuckDB | 🟡 Đang thực hiện | ▓▓▓▓▓▓▓▓░░ 80% |
+| 1 | Thu thập & Xử lý dữ liệu, Star Schema, DuckDB | 🟢 Hoàn thành | ▓▓▓▓▓▓▓▓▓░ 95% |
 | 2 | Tích hợp Gemini Flash, Prompt Engineering, Text-to-SQL | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 3 | SQL Guardrails & Self-Correction Loop | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 4 | Auto Visualization & Insight Generation | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
@@ -19,7 +19,7 @@
 | 7 | Viết báo cáo đồ án | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 8 | Đóng gói, Slide & Video demo | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 
-**Tiến độ tổng thể:** ▓░░░░░░░░░ **10%**
+**Tiến độ tổng thể:** ▓░░░░░░░░░ **12%**
 
 ---
 
@@ -61,7 +61,7 @@
 
 ### 1.3 Thiết kế lược đồ Star Schema ⏱️ _~4 giờ_
 
-- [ ] Vẽ sơ đồ ERD cho Star Schema
+- [x] Vẽ sơ đồ ERD cho Star Schema
 - [x] Thiết kế bảng **Fact: `fact_orders`**
   - [ ] Xác định các khóa ngoại (FK) liên kết đến Dimension
   - [ ] Xác định các measure: `price`, `freight_value`, `payment_value`, `review_score`
@@ -101,14 +101,14 @@
   - [x] Danh sách cột: tên, kiểu dữ liệu, mô tả, ví dụ giá trị
   - [x] Quan hệ giữa các bảng (khóa chính, khóa ngoại)
 - [x] Bổ sung các ví dụ truy vấn SQL mẫu (5-10 câu) cho few-shot prompting
-- [ ] Viết hàm `get_schema_description()` trả về chuỗi mô tả schema cho LLM
-- [ ] Unit test: kiểm tra schema metadata khớp với bảng thực trong DuckDB
+- [x] Viết hàm `get_schema_description()` trả về chuỗi mô tả schema cho LLM
+- [x] Unit test: kiểm tra schema metadata khớp với bảng thực trong DuckDB
 
 ### 1.6 Tài liệu & Kiểm tra cuối tuần ⏱️ _~1 giờ_
 
-- [ ] Cập nhật `README.md` với hướng dẫn cài đặt ban đầu
+- [x] Cập nhật `README.md` với hướng dẫn cài đặt ban đầu
 - [ ] Commit code lên Git với message rõ ràng
-- [ ] Review lại toàn bộ output tuần 1
+- [x] Review lại toàn bộ output tuần 1
 
 > **Tổng thời gian ước tính Tuần 1:** ~20 giờ
 

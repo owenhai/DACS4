@@ -677,6 +677,11 @@ LIMIT 10;
     return "\n".join(lines)
 
 
+def get_schema_description() -> str:
+    """Return the formatted schema description for LLM prompts."""
+    return format_schema_for_prompt()
+
+
 if __name__ == "__main__":
     # In schema để kiểm tra
     schema_text = format_schema_for_prompt()
