@@ -1,0 +1,37 @@
+# === Biến môi trường (chứa API key, không được commit) ===
+.env
+
+# === Dữ liệu thô từ Kaggle (tải lại được, không cần lưu trong git) ===
+data/raw/
+
+# === File cơ sở dữ liệu DuckDB (tạo lại được từ ETL pipeline) ===
+data/database/*.duckdb
+
+# === Python cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# === Môi trường ảo Python ===
+.venv/
+venv/
+env/
+
+# === IDE / Editor ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === Jupyter Notebook checkpoints ===
+.ipynb_checkpoints/
+
+# === Hệ điều hành ===
+Thumbs.db
+.DS_Store
+
+# === Build / Distribution ===
+*.egg-info/
+dist/
+build/

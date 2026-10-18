@@ -1,0 +1,28 @@
+# DACS4 - Automated Data Insights Engine
+# Các thư viện cần thiết cho dự án
+
+# Xử lý dữ liệu
+pandas>=2.0
+polars>=0.20
+pyarrow
+
+# Cơ sở dữ liệu
+duckdb>=0.10
+
+# AI / LLM
+google-genai>=1.0
+
+# Giao diện web
+streamlit>=1.30
+
+# Trực quan hóa dữ liệu
+plotly>=5.18
+
+# Xử lý SQL
+sqlparse>=0.5
+
+# Tải dữ liệu từ Kaggle
+kagglehub
+
+# Quản lý biến môi trường
+python-dotenv
