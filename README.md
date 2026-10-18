@@ -33,7 +33,13 @@ Kaggle access is required for the download step.
 ```powershell
 python -m unittest discover -s tests -v
 python -m src.data.schema_metadata
+python -m src.data.eda
 ```
+
+The EDA command checks all nine raw CSV files and prints row counts, column
+counts, null cells, duplicate rows, and source data types. The Week 1 tests
+also validate source row counts, dimension keys, and representative analytical
+queries against DuckDB.
 
 The database contains `fact_orders` and the dimensions `dim_customers`, `dim_products`, `dim_sellers`, `dim_date`, and `dim_geolocation`.
 

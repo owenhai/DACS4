@@ -10,7 +10,7 @@
 
 | Tuần | Nội dung chính | Trạng thái | Hoàn thành |
 |:----:|----------------|:----------:|:----------:|
-| 1 | Thu thập & Xử lý dữ liệu, Star Schema, DuckDB | 🟢 Hoàn thành | ▓▓▓▓▓▓▓▓▓░ 95% |
+| 1 | Thu thập & Xử lý dữ liệu, Star Schema, DuckDB | 🟢 Hoàn thành | ▓▓▓▓▓▓▓▓▓▓ 100% |
 | 2 | Tích hợp Gemini Flash, Prompt Engineering, Text-to-SQL | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 3 | SQL Guardrails & Self-Correction Loop | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 4 | Auto Visualization & Insight Generation | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
@@ -23,12 +23,12 @@
 
 ---
 
-## 🟡 TUẦN 1 — Thu thập dữ liệu, Star Schema & DuckDB `Đang thực hiện`
+## 🟢 TUẦN 1 — Thu thập dữ liệu, Star Schema & DuckDB `Hoàn thành`
 
 ### 1.1 Thu thập bộ dữ liệu Olist E-Commerce ⏱️ _~3 giờ_
 
 - [x] Tải bộ dữ liệu Olist Brazilian E-Commerce từ Kaggle
-- [ ] Kiểm tra đầy đủ các file CSV (9 file):
+- [x] Kiểm tra đầy đủ các file CSV (9 file):
   - [x] `olist_orders_dataset.csv`
   - [x] `olist_order_items_dataset.csv`
   - [x] `olist_order_payments_dataset.csv`
@@ -39,22 +39,22 @@
   - [x] `olist_geolocation_dataset.csv`
   - [x] `product_category_name_translation.csv`
 - [x] Tạo thư mục `data/raw/` và lưu trữ dữ liệu gốc
-- [ ] Viết script khám phá dữ liệu ban đầu (EDA sơ bộ): shape, dtypes, null counts
+- [x] Viết script khám phá dữ liệu ban đầu (EDA sơ bộ): shape, dtypes, null counts
 
 ### 1.2 Làm sạch & Chuẩn hóa dữ liệu ⏱️ _~5 giờ_
 
-- [ ] Phân tích giá trị khuyết thiếu (missing values) cho từng bảng
-  - [ ] Xác định chiến lược xử lý cho từng cột (drop / fill / impute)
-  - [ ] Ghi nhận tỉ lệ missing và lý do xử lý
+- [x] Phân tích giá trị khuyết thiếu (missing values) cho từng bảng
+  - [x] Xác định chiến lược xử lý cho từng cột (drop / fill / impute)
+  - [x] Ghi nhận tỉ lệ missing và lý do xử lý qua EDA và log pipeline
 - [x] Xử lý giá trị khuyết thiếu
-  - [ ] Xử lý null trong `order_delivered_customer_date`
-  - [ ] Xử lý null trong `order_approved_at`
-  - [ ] Xử lý null trong `product_category_name`
-  - [ ] Xử lý null trong `review_comment_title`, `review_comment_message`
+  - [x] Xử lý null trong `order_delivered_customer_date`
+    - [x] Xử lý null trong `order_approved_at` (giữ `NaT` để phản ánh đơn chưa duyệt)
+    - [x] Xử lý null trong `product_category_name`
+    - [x] Xử lý null trong `review_comment_title`, `review_comment_message`
 - [x] Chuẩn hóa kiểu dữ liệu
-  - [ ] Chuyển các cột ngày tháng sang `datetime`
-  - [ ] Chuẩn hóa kiểu số (int, float) cho price, freight, dimensions
-  - [ ] Chuẩn hóa kiểu chuỗi (string) – loại bỏ khoảng trắng thừa
+  - [x] Chuyển các cột ngày tháng sang `datetime`
+  - [x] Chuẩn hóa kiểu số (int, float) cho price, freight, dimensions
+  - [x] Chuẩn hóa kiểu chuỗi (string) – loại bỏ khoảng trắng thừa
 - [x] Dịch tên danh mục sản phẩm từ tiếng Bồ Đào Nha sang tiếng Anh
 - [x] Loại bỏ bản ghi trùng lặp (nếu có)
 - [x] Tạo thư mục `data/processed/` và lưu dữ liệu đã làm sạch
@@ -63,17 +63,17 @@
 
 - [x] Vẽ sơ đồ ERD cho Star Schema
 - [x] Thiết kế bảng **Fact: `fact_orders`**
-  - [ ] Xác định các khóa ngoại (FK) liên kết đến Dimension
-  - [ ] Xác định các measure: `price`, `freight_value`, `payment_value`, `review_score`
-  - [ ] Định nghĩa granularity (mức chi tiết: order_item level)
+  - [x] Xác định các khóa ngoại (FK) liên kết đến Dimension
+  - [x] Xác định các measure: `price`, `freight_value`, `payment_value`, `review_score`
+  - [x] Định nghĩa granularity (mức chi tiết: order_item level)
 - [x] Thiết kế bảng **Dimension: `dim_customers`**
-  - [ ] Các cột: `customer_id`, `customer_unique_id`, `city`, `state`, `zip_code_prefix`
+  - [x] Các cột: `customer_id`, `customer_unique_id`, `city`, `state`, `zip_code_prefix`
 - [x] Thiết kế bảng **Dimension: `dim_products`**
-  - [ ] Các cột: `product_id`, `category_name`, `category_name_english`, `weight_g`, `length_cm`, `height_cm`, `width_cm`, `photos_qty`, `description_length`, `name_length`
+  - [x] Các cột: `product_id`, `category_name`, `category_name_english`, `weight_g`, `length_cm`, `height_cm`, `width_cm`, `photos_qty`, `description_length`, `name_length`
 - [x] Thiết kế bảng **Dimension: `dim_sellers`**
-  - [ ] Các cột: `seller_id`, `seller_city`, `seller_state`, `seller_zip_code_prefix`
+  - [x] Các cột: `seller_id`, `seller_city`, `seller_state`, `seller_zip_code_prefix`
 - [x] Thiết kế bảng **Dimension: `dim_date`** (bảng thời gian)
-  - [ ] Các cột: `date_key`, `full_date`, `year`, `quarter`, `month`, `month_name`, `week`, `day_of_week`, `day_name`, `is_weekend`
+  - [x] Các cột: `date_key`, `full_date`, `year`, `quarter`, `month`, `month_name`, `week`, `day_of_week`, `day_name`, `is_weekend`
 - [x] Thiết kế bảng **Dimension: `dim_geolocation`**
   - [ ] Các cột: `zip_code_prefix`, `lat`, `lng`, `city`, `state`
 
@@ -90,8 +90,8 @@
   - [x] Tạo bảng `fact_orders` và nạp dữ liệu (JOIN từ nhiều bảng nguồn)
 - [x] Thiết lập khóa chính (PRIMARY KEY) và ràng buộc (CONSTRAINTS)
 - [x] Kiểm tra tính toàn vẹn dữ liệu sau khi nạp
-  - [ ] So sánh row count giữa nguồn và DuckDB
-  - [ ] Chạy vài truy vấn kiểm tra mẫu
+  - [x] So sánh row count giữa nguồn và DuckDB
+  - [x] Chạy vài truy vấn kiểm tra mẫu
 
 ### 1.5 Xây dựng Schema Metadata (Từ điển cấu trúc) ⏱️ _~3 giờ_
 
