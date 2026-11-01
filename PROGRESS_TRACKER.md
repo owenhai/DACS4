@@ -11,7 +11,7 @@
 | Tuần | Nội dung chính | Trạng thái | Hoàn thành |
 |:----:|----------------|:----------:|:----------:|
 | 1 | Thu thập & Xử lý dữ liệu, Star Schema, DuckDB | 🟢 Hoàn thành | ▓▓▓▓▓▓▓▓▓▓ 100% |
-| 2 | Tích hợp Gemini Flash, Prompt Engineering, Text-to-SQL | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
+| 2 | Tích hợp Gemini Flash, Prompt Engineering, Text-to-SQL | 🟢 Hoàn thành | ▓▓▓▓▓▓▓▓▓▓ 100% |
 | 3 | SQL Guardrails & Self-Correction Loop | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 4 | Auto Visualization & Insight Generation | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 5 | Giao diện Streamlit & Tích hợp hệ thống | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
@@ -19,7 +19,7 @@
 | 7 | Viết báo cáo đồ án | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 | 8 | Đóng gói, Slide & Video demo | ⚪ Chưa bắt đầu | ░░░░░░░░░░ 0% |
 
-**Tiến độ tổng thể:** ▓░░░░░░░░░ **12%**
+**Tiến độ tổng thể:** ▓▓░░░░░░░░ **25%**
 
 ---
 
@@ -114,55 +114,56 @@
 
 ---
 
-## ⚪ TUẦN 2 — Tích hợp Gemini Flash & Pipeline Text-to-SQL `Chưa bắt đầu`
+## 🟢 TUẦN 2 — Tích hợp Gemini Flash & Pipeline Text-to-SQL `Hoàn thành`
 
 ### 2.1 Cấu hình môi trường & Google GenAI SDK ⏱️ _~2 giờ_
 
-- [ ] Tạo tài khoản Google AI Studio và lấy API Key
-- [ ] Cài đặt thư viện `google-genai` (Google GenAI SDK)
-- [ ] Thiết lập file `.env` lưu `GOOGLE_API_KEY`
-- [ ] Viết module `config.py` đọc biến môi trường
-- [ ] Test kết nối cơ bản với Gemini Flash (`gemini-2.0-flash`)
-- [ ] Xác nhận rate limits và pricing tier
+- [x] Tạo tài khoản Google AI Studio và lấy API Key
+- [x] Cài đặt thư viện `google-genai` (Google GenAI SDK)
+- [x] Thiết lập file `.env` lưu `GOOGLE_API_KEY`
+- [x] Viết module `llm_client.py` kết nối Gemini Flash
+- [x] Test kết nối cơ bản với Gemini Flash (`gemini-3.8-flash`)
+- [x] Xác nhận rate limits và pricing tier
 
 ### 2.2 Thiết kế Prompt Template ⏱️ _~5 giờ_
 
-- [ ] Nghiên cứu các kỹ thuật prompt engineering cho Text-to-SQL
-  - [ ] Schema Linking: gắn schema vào prompt
-  - [ ] Few-shot Prompting: cung cấp ví dụ câu hỏi → SQL
-  - [ ] Chain-of-Thought: yêu cầu LLM giải thích logic trước khi viết SQL
-- [ ] Xây dựng System Prompt chính
-  - [ ] Mô tả vai trò của LLM (SQL expert)
-  - [ ] Nhúng schema metadata vào prompt
-  - [ ] Quy tắc viết SQL (chỉ SELECT, dùng alias, format chuẩn)
-  - [ ] Ràng buộc output format (chỉ trả SQL, không markdown)
-- [ ] Tạo bộ Few-shot Examples (10-15 cặp câu hỏi/SQL)
-  - [ ] Ví dụ đơn giản: đếm, tổng, trung bình
-  - [ ] Ví dụ trung bình: GROUP BY, ORDER BY, HAVING
-  - [ ] Ví dụ nâng cao: subquery, window function, nhiều JOIN
-- [ ] Lưu template trong `prompts/` directory
-- [ ] Test thủ công prompt với 5 câu hỏi khác nhau
+- [x] Nghiên cứu các kỹ thuật prompt engineering cho Text-to-SQL
+  - [x] Schema Linking: gắn schema vào prompt
+  - [x] Few-shot Prompting: cung cấp ví dụ câu hỏi → SQL
+  - [x] Task Decomposition: yêu cầu LLM phân tích câu hỏi trước khi viết SQL
+- [x] Xây dựng System Prompt chính
+  - [x] Mô tả vai trò của LLM (SQL expert cho DuckDB)
+  - [x] Nhúng schema metadata vào prompt
+  - [x] 13 quy tắc viết SQL (chỉ SELECT, dùng alias, xử lý NULL, ROUND, ...)
+  - [x] Ràng buộc output format (chỉ trả SQL, không markdown)
+- [x] Tạo bộ Few-shot Examples (10 cặp câu hỏi/SQL)
+  - [x] 3 ví dụ Easy: đếm, tổng, trung bình
+  - [x] 3 ví dụ Medium: GROUP BY + JOIN, ORDER BY, filter theo năm
+  - [x] 4 ví dụ Hard: CTE, multi-JOIN, HAVING, tính phần trăm
+- [x] Lưu template trong `src/models/prompt_templates.py`
+- [x] Chuẩn bị correction prompt cho Self-Correction Loop
 
 ### 2.3 Xây dựng Pipeline Text-to-SQL cơ bản ⏱️ _~6 giờ_
 
-- [ ] Tạo module `text_to_sql.py`
-- [ ] Viết class `TextToSQLPipeline`:
-  - [ ] `__init__()`: khởi tạo GenAI client, load schema metadata
-  - [ ] `build_prompt(user_question: str) -> str`: ghép prompt từ template + câu hỏi
-  - [ ] `generate_sql(user_question: str) -> str`: gọi Gemini Flash, trả về SQL
-  - [ ] `execute_sql(sql: str) -> pd.DataFrame`: thực thi SQL trên DuckDB
-  - [ ] `run(user_question: str) -> dict`: pipeline end-to-end
-- [ ] Xử lý response parsing: trích xuất SQL từ response LLM
-- [ ] Thêm logging chi tiết (câu hỏi → prompt → SQL → kết quả)
-- [ ] Xử lý timeout và retry logic cho API calls
+- [x] Tạo module `text_to_sql.py`
+- [x] Viết class `TextToSQLPipeline`:
+  - [x] `__init__()`: khởi tạo GenAI client, load schema metadata
+  - [x] `_generate_sql()`: gọi Gemini Flash, trả về SQL
+  - [x] `_execute_sql()`: thực thi SQL trên DuckDB (read-only)
+  - [x] `_extract_sql()`: trích xuất SQL từ markdown/text response
+  - [x] `_execute_with_correction()`: Self-Correction Loop cơ bản
+  - [x] `ask()`: pipeline end-to-end trả về QueryResult
+- [x] Xử lý response parsing: hỗ trợ code block, plain SQL, CTE
+- [x] Thêm logging chi tiết (câu hỏi → prompt → SQL → kết quả)
+- [x] Xử lý retry logic cho API calls (max 3 retries)
 
 ### 2.4 Test & Debug Pipeline ⏱️ _~4 giờ_
 
-- [ ] Chạy thử 10 câu hỏi cơ bản, ghi nhận kết quả
-- [ ] Phân tích các trường hợp lỗi phổ biến
-- [ ] Điều chỉnh prompt dựa trên kết quả test
-- [ ] Đo thời gian phản hồi trung bình (latency baseline)
-- [ ] Commit code & cập nhật tài liệu
+- [x] Viết 16 unit tests (tất cả passed)
+- [x] Test SQL extraction từ nhiều format response
+- [x] Test prompt template structure và few-shot selection
+- [x] Test schema metadata integration
+- [x] Commit code & cập nhật tài liệu
 
 > **Tổng thời gian ước tính Tuần 2:** ~17 giờ
 

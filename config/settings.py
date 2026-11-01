@@ -60,7 +60,7 @@ SCHEMA_METADATA: dict[str, dict] = {
 
 # === Cấu hình LLM ===
 # Model Gemini Flash dùng cho Text-to-SQL
-GEMINI_MODEL: str = "gemini-2.0-flash"
+GEMINI_MODEL: str = "gemini-3.8-flash"
 
 # Nhiệt độ sinh (temperature) - giá trị thấp cho kết quả ổn định
 GEMINI_TEMPERATURE: float = 0.1
