@@ -1,18 +1,45 @@
 # DACS4 - Automated Data Insights Engine
 
-## Week 1: Olist ETL and Star Schema
+Hệ thống phân tích dữ liệu thương mại điện tử Olist bằng **DuckDB**, kết hợp
+**Text-to-SQL** và mô hình **Gemini Flash**. Người dùng có thể đặt câu hỏi
+bằng ngôn ngữ tự nhiên; pipeline sẽ tạo SQL, thực thi trên Star Schema và
+trả về kết quả phân tích.
 
-This project downloads the Olist Brazilian E-Commerce dataset, cleans the source CSV files, and loads a Star Schema into DuckDB.
+## Tiến độ dự án
 
-## Setup
+- **Tuần 1 - Hoàn thành:** Thu thập, làm sạch dữ liệu Olist, xây dựng Star
+  Schema và nạp dữ liệu vào DuckDB.
+- **Tuần 2 - Hoàn thành cơ bản:** Tích hợp Gemini Flash, Prompt Engineering,
+  Few-shot Prompting và pipeline Text-to-SQL.
+- **Tuần 3 - Tiếp theo:** SQL Guardrails và nâng cấp Self-Correction Loop.
+- **Tuần 4-8:** Visualization, giao diện Streamlit, đánh giá, báo cáo và
+  đóng gói.
+
+## Yêu cầu
+
+- Python 3.10 trở lên
+- API key của Google Gemini nếu muốn gọi pipeline Text-to-SQL
+
+## Cài đặt
+
+Mở Terminal tại thư mục gốc của dự án:
 
 ```powershell
+cd "D:\Project _Lab_Doc\DA\DACS4"
 python -m pip install -r requirements.txt
 ```
 
-## Run the Olist pipeline
+Tạo file `.env` ở thư mục gốc và thêm API key:
 
-Run these commands from the project root:
+```text
+GOOGLE_API_KEY=your_google_gemini_api_key
+```
+
+Không commit file `.env` hoặc API key lên Git.
+
+## Chạy pipeline dữ liệu
+
+Chạy lần lượt từ thư mục gốc:
 
 ```powershell
 python -m src.data.download_dataset
@@ -20,27 +47,80 @@ python -m src.data.clean_data
 python -m src.data.star_schema
 ```
 
-The pipeline creates:
+Pipeline tạo ra:
 
-- Raw CSV files in `data/raw/`
-- Clean Parquet files in `data/processed/`
-- DuckDB database at `data/database/olist_analytics.duckdb`
+- Dữ liệu CSV gốc trong `data/raw/`
+- Dữ liệu Parquet đã xử lý trong `data/processed/`
+- Database DuckDB tại `data/database/olist_analytics.duckdb`
 
-Kaggle access is required for the download step.
+Lệnh tải dữ liệu yêu cầu cấu hình quyền truy cập Kaggle. Nếu dữ liệu đã có
+sẵn trong `data/raw/`, có thể bỏ qua bước download.
 
-## Validate Week 1 outputs
+## Kiểm tra dự án
+
+Chạy toàn bộ unit test:
 
 ```powershell
 python -m unittest discover -s tests -v
+```
+
+Kết quả hiện tại: **21 tests passed**.
+
+Kiểm tra metadata và báo cáo EDA:
+
+```powershell
 python -m src.data.schema_metadata
 python -m src.data.eda
 ```
 
-The EDA command checks all nine raw CSV files and prints row counts, column
-counts, null cells, duplicate rows, and source data types. The Week 1 tests
-also validate source row counts, dimension keys, and representative analytical
-queries against DuckDB.
+Các test hiện có kiểm tra:
 
-The database contains `fact_orders` and the dimensions `dim_customers`, `dim_products`, `dim_sellers`, `dim_date`, and `dim_geolocation`.
+- Database có đủ các bảng Star Schema.
+- Số lượng bản ghi của bảng fact và dữ liệu nguồn.
+- Khóa liên kết giữa fact và dimension không bị mồ côi.
+- Schema metadata khớp với database.
+- Prompt, few-shot examples và SQL extraction của Text-to-SQL.
 
-See [docs/STAR_SCHEMA.md](docs/STAR_SCHEMA.md) for the ERD and table relationships.
+## Cấu trúc dữ liệu
+
+Database gồm bảng fact:
+
+- `fact_orders`
+
+Và các bảng dimension:
+
+- `dim_customers`
+- `dim_products`
+- `dim_sellers`
+- `dim_date`
+- `dim_geolocation`
+
+## Cấu trúc mã nguồn
+
+```text
+config/                 Cấu hình đường dẫn và Gemini
+data/raw/               Dữ liệu CSV gốc
+data/processed/         Dữ liệu Parquet đã làm sạch
+data/database/          Database DuckDB
+src/data/               Download, cleaning, EDA, schema và ETL
+src/models/             Gemini client, prompt và Text-to-SQL
+tests/                  Unit tests cho Week 1 và Week 2
+docs/                   Tài liệu Star Schema và báo cáo tuần
+```
+
+## Ghi chú về giao diện web
+
+Thư viện Streamlit đã được khai báo trong `requirements.txt`, nhưng giao diện
+web chưa được triển khai. Sau khi hoàn thành phần UI, ứng dụng sẽ được chạy
+bằng:
+
+```powershell
+streamlit run app.py
+```
+
+## Tài liệu liên quan
+
+- [Star Schema](docs/STAR_SCHEMA.md)
+- [Tổng kết Week 1](docs/WEEK1_SUMMARY.md)
+- [Theo dõi tiến độ](PROGRESS_TRACKER.md)
+- [Đề cương dự án](project_proposal.md)
