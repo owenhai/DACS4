@@ -19,6 +19,7 @@ trả về kết quả phân tích.
 
 - Python 3.10 trở lên
 - API key của Google Gemini nếu muốn gọi pipeline Text-to-SQL
+- Model mặc định: `gemini-3.8-flash`
 
 ## Cài đặt
 
@@ -109,6 +110,14 @@ docs/                   Tài liệu Star Schema và báo cáo tuần
 ```
 
 ## Ghi chú về giao diện web
+
+Để giảm thời gian phản hồi của pipeline Text-to-SQL, cấu hình mặc định hiện
+dùng 2 ví dụ few-shot, tắt bước phân rã câu hỏi và chỉ thử self-correction
+thêm 1 lần. Có thể truyền `num_few_shot` hoặc `max_corrections` khi khởi tạo
+`TextToSQLPipeline` nếu cần ưu tiên độ chính xác cho câu hỏi phức tạp.
+Khi Gemini trả lỗi tạm thời như 503 hoặc 429, client tự retry với exponential
+backoff và jitter. Có thể đặt `GEMINI_FALLBACK_MODEL` trong biến môi trường để
+thử model dự phòng sau khi model chính liên tục quá tải.
 
 Thư viện Streamlit đã được khai báo trong `requirements.txt`, nhưng giao diện
 web chưa được triển khai. Sau khi hoàn thành phần UI, ứng dụng sẽ được chạy

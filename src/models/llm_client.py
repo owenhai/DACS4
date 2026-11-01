@@ -10,6 +10,7 @@ Cung cấp lớp GeminiClient bọc (wrapper) Google GenAI SDK, hỗ trợ:
 import json
 import logging
 import os
+import random
 import time
 from typing import Any
 
@@ -38,8 +39,9 @@ class GeminiClient:
         self,
         model_name: str = "gemini-3.8-flash",
         temperature: float = 0.1,
-        max_output_tokens: int = 2048,
+        max_output_tokens: int = 768,
         api_key: str | None = None,
+        fallback_model: str | None = None,
     ) -> None:
         """Khởi tạo GeminiClient.
 
@@ -58,6 +60,9 @@ class GeminiClient:
         self.model_name = model_name
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
+        self.fallback_model = fallback_model or os.environ.get(
+            "GEMINI_FALLBACK_MODEL"
+        )
 
         # Lấy API key
         resolved_key = api_key or os.environ.get("GOOGLE_API_KEY")
@@ -118,56 +123,95 @@ class GeminiClient:
 
         config = types.GenerateContentConfig(**config_kwargs)
 
-        # Gọi API với retry
+        # Retry chỉ các lỗi tạm thời; lỗi prompt hoặc quyền truy cập không nên
+        # bị trì hoãn nhiều lần.
         last_error: Exception | None = None
-        for attempt in range(1, max_retries + 1):
-            try:
-                logger.debug(
-                    "Gọi Gemini (lần %d/%d): prompt length=%d",
-                    attempt,
-                    max_retries,
-                    len(prompt),
-                )
+        models = [self.model_name]
+        if self.fallback_model and self.fallback_model != self.model_name:
+            models.append(self.fallback_model)
 
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=prompt,
-                    config=config,
-                )
+        for model_index, model_name in enumerate(models):
+            for attempt in range(1, max_retries + 1):
+                try:
+                    logger.debug(
+                        "Gọi Gemini (model=%s, lần %d/%d): prompt length=%d",
+                        model_name,
+                        attempt,
+                        max_retries,
+                        len(prompt),
+                    )
 
-                result_text = response.text
-                if result_text is None:
-                    # Kiểm tra block reason
-                    if response.candidates and response.candidates[0].finish_reason:
-                        reason = response.candidates[0].finish_reason
-                        logger.warning("Phản hồi bị chặn: finish_reason=%s", reason)
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config=config,
+                    )
+
+                    result_text = response.text
+                    if result_text is None:
+                        if response.candidates and response.candidates[0].finish_reason:
+                            reason = response.candidates[0].finish_reason
+                            logger.warning(
+                                "Phản hồi bị chặn: finish_reason=%s", reason
+                            )
+                            raise RuntimeError(
+                                f"Gemini từ chối phản hồi: {reason}"
+                            )
+                        raise RuntimeError("Gemini trả về phản hồi rỗng.")
+
+                    logger.info(
+                        "Gemini phản hồi thành công: %d ký tự", len(result_text)
+                    )
+                    return result_text
+
+                except Exception as e:
+                    last_error = e
+                    if not self._is_transient_error(e):
                         raise RuntimeError(
-                            f"Gemini từ chối phản hồi: {reason}"
-                        )
-                    raise RuntimeError("Gemini trả về phản hồi rỗng.")
+                            f"Gemini trả về lỗi không thể retry: {e}"
+                        ) from e
 
-                logger.info(
-                    "Gemini phản hồi thành công: %d ký tự", len(result_text)
-                )
-                return result_text
+                    logger.warning(
+                        "Lỗi tạm thời Gemini (model=%s, lần %d/%d): %s",
+                        model_name,
+                        attempt,
+                        max_retries,
+                        str(e),
+                    )
+                    if attempt < max_retries:
+                        wait = min(retry_delay * (2 ** (attempt - 1)), 16.0)
+                        wait += random.uniform(0, 0.5)
+                        logger.info("Chờ %.1f giây trước khi retry...", wait)
+                        time.sleep(wait)
 
-            except Exception as e:
-                last_error = e
+            if model_index < len(models) - 1:
                 logger.warning(
-                    "Lỗi gọi Gemini (lần %d/%d): %s",
-                    attempt,
-                    max_retries,
-                    str(e),
+                    "Model %s vẫn không khả dụng; chuyển sang fallback model %s",
+                    model_name,
+                    models[model_index + 1],
                 )
-                if attempt < max_retries:
-                    wait = retry_delay * attempt
-                    logger.info("Chờ %.1f giây trước khi retry...", wait)
-                    time.sleep(wait)
 
         raise RuntimeError(
-            f"Không thể gọi Gemini sau {max_retries} lần thử. "
-            f"Lỗi cuối: {last_error}"
+            f"Không thể gọi Gemini sau {len(models)} model và "
+            f"{max_retries} lần thử/model. Lỗi cuối: {last_error}"
         )
+
+    @staticmethod
+    def _is_transient_error(error: Exception) -> bool:
+        """Xác định lỗi có khả năng tự hết và nên được retry."""
+        message = str(error).lower()
+        transient_markers = (
+            "503",
+            "service unavailable",
+            "429",
+            "resource exhausted",
+            "rate limit",
+            "deadline exceeded",
+            "timed out",
+            "timeout",
+            "temporarily unavailable",
+        )
+        return any(marker in message for marker in transient_markers)
 
     def generate_json(
         self,

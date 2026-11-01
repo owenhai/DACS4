@@ -100,8 +100,8 @@ class TextToSQLPipeline:
         self,
         db_path: str | Path | None = None,
         llm_client: GeminiClient | None = None,
-        max_corrections: int = 3,
-        num_few_shot: int = 5,
+        max_corrections: int = 1,
+        num_few_shot: int = 2,
     ) -> None:
         """Khởi tạo Text-to-SQL Pipeline.
 
@@ -208,13 +208,15 @@ class TextToSQLPipeline:
             user_question=question,
             schema_text=self.schema_text,
             num_examples=self.num_few_shot,
-            include_decomposition=True,
+            include_decomposition=False,
         )
 
         # Gọi LLM
         raw_response = self.llm_client.generate(
             prompt=prompt,
             system_instruction=self.system_instruction,
+            max_retries=2,
+            retry_delay=1.0,
         )
 
         # Trích xuất SQL từ response
@@ -320,6 +322,8 @@ class TextToSQLPipeline:
         raw_response = self.llm_client.generate(
             prompt=correction_prompt,
             system_instruction=self.system_instruction,
+            max_retries=2,
+            retry_delay=1.0,
         )
 
         return self._extract_sql(raw_response)

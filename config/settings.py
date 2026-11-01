@@ -66,4 +66,7 @@ GEMINI_MODEL: str = "gemini-3.8-flash"
 GEMINI_TEMPERATURE: float = 0.1
 
 # Số token tối đa cho phản hồi
-GEMINI_MAX_OUTPUT_TOKENS: int = 2048
+GEMINI_MAX_OUTPUT_TOKENS: int = 768
+
+# Model dự phòng, tùy chọn. Đặt qua biến môi trường nếu model chính quá tải.
+GEMINI_FALLBACK_MODEL: str = ""
