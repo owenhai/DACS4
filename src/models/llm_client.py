@@ -37,12 +37,76 @@ class GeminiClient:
 
     def __init__(
         self,
-        model_name: str = "gemini-3.8-flash",
+        model_name: str = "gemini-1.5-pro",
         temperature: float = 0.1,
         max_output_tokens: int = 768,
         api_key: str | None = None,
-        fallback_model: str | None = None,
+        fallback_model: str | None = "gemini-3.8-flash",
     ) -> None:
+        """Khởi tạo GeminiClient.
+
+        Thêm fallback model mặc định là ``gemini-3.8-flash`` để có dự phòng khi mô hình nhẹ
+        bị quá tải (503). Tham số ``fallback_model`` vẫn có thể bỏ qua nếu người dùng muốn.
+        """
+
+        # Load .env nếu có
+        load_dotenv()
+
+        self.model_name = model_name
+        self.temperature = temperature
+        self.max_output_tokens = max_output_tokens
+        self.fallback_model = fallback_model or os.environ.get(
+            "GEMINI_FALLBACK_MODEL"
+        )
+
+        # Lấy API key
+        resolved_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if not resolved_key:
+            raise ValueError(
+                "Không tìm thấy GEMINI_API_KEY. "
+                "Vui lòng đặt biến môi trường hoặc tạo file .env."
+            )
+
+        # Khởi tạo client
+        self.client = genai.Client(api_key=resolved_key)
+        logger.info(
+            "Đã khởi tạo GeminiClient: model=%s, temperature=%.2f, fallback=%s",
+            self.model_name,
+            self.temperature,
+            self.fallback_model,
+        )
+        """Khởi tạo GeminiClient.
+
+        Thêm fallback model mặc định là ``gemini-1.5-flash`` để có dự phòng khi mô hình chính
+        bị quá tải (503). Tham số ``fallback_model`` vẫn có thể bỏ qua nếu người dùng muốn.
+        """
+
+        # Load .env nếu có
+        load_dotenv()
+
+        self.model_name = model_name
+        self.temperature = temperature
+        self.max_output_tokens = max_output_tokens
+        self.fallback_model = fallback_model or os.environ.get(
+            "GEMINI_FALLBACK_MODEL"
+        )
+
+        # Lấy API key
+        resolved_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if not resolved_key:
+            raise ValueError(
+                "Không tìm thấy GEMINI_API_KEY. "
+                "Vui lòng đặt biến môi trường hoặc tạo file .env."
+            )
+
+        # Khởi tạo client
+        self.client = genai.Client(api_key=resolved_key)
+        logger.info(
+            "Đã khởi tạo GeminiClient: model=%s, temperature=%.2f, fallback=%s",
+            self.model_name,
+            self.temperature,
+            self.fallback_model,
+        )
         """Khởi tạo GeminiClient.
 
         Args:
@@ -65,10 +129,10 @@ class GeminiClient:
         )
 
         # Lấy API key
-        resolved_key = api_key or os.environ.get("GOOGLE_API_KEY")
+        resolved_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
         if not resolved_key:
             raise ValueError(
-                "Không tìm thấy GOOGLE_API_KEY. "
+                "Không tìm thấy GEMINI_API_KEY. "
                 "Vui lòng đặt biến môi trường hoặc tạo file .env."
             )
 
@@ -86,9 +150,38 @@ class GeminiClient:
         system_instruction: str | None = None,
         response_mime_type: str | None = None,
         response_schema: dict | None = None,
-        max_retries: int = 3,
+        max_retries: int = 1,
         retry_delay: float = 2.0,
     ) -> str:
+        """Generate response with simple file‑based cache.
+
+        The cache key is a SHA‑256 hash of the full prompt (including any system
+        instruction and response settings). If a cached response exists, it is
+        returned immediately without calling the Gemini API. Otherwise the
+        request is sent, the response is stored in the cache, and then returned.
+        """
+
+        # ---------- Cache handling ----------
+        import hashlib, pathlib, json
+        cache_dir = pathlib.Path("cache/llm_responses")
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        # Build a deterministic cache key from the prompt and settings
+        cache_key_source = json.dumps({
+            "prompt": prompt,
+            "system_instruction": system_instruction,
+            "response_mime_type": response_mime_type,
+            "response_schema": response_schema,
+        }, sort_keys=True, ensure_ascii=False)
+        cache_key = hashlib.sha256(cache_key_source.encode()).hexdigest()
+        cache_file = cache_dir / f"{cache_key}.json"
+        if cache_file.exists():
+            try:
+                cached = json.loads(cache_file.read_text())
+                logger.info("Cache hit for prompt (hash=%s)", cache_key)
+                return cached["response"]
+            except Exception as e:
+                logger.warning("Failed to read cache file %s: %s", cache_file, e)
+        # ---------- End cache handling ----------
         """Gọi Gemini Flash và trả về text phản hồi.
 
         Args:

@@ -215,8 +215,14 @@ def build_text_to_sql_prompt(
         Prompt hoàn chỉnh sẵn sàng gửi cho LLM.
     """
     sections: list[str] = []
+    # --- System Instruction ---
+    sections.append(SYSTEM_INSTRUCTION.strip())
+    sections.append("")
 
-    # --- Phần 1: Schema Context (Schema Linking) ---
+
+    # --- System Instruction ---
+    sections.append(SYSTEM_INSTRUCTION.strip())
+    sections.append("\n")
     sections.append("=" * 60)
     sections.append("DATABASE SCHEMA")
     sections.append("=" * 60)

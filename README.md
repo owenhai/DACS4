@@ -23,6 +23,22 @@ trả về kết quả phân tích.
 
 ## Cài đặt
 
+**Giảm độ trễ cho pipeline Text‑to‑SQL**
+
+- **Cache kết quả LLM**: mỗi prompt (cùng system instruction và cấu hình) được băm SHA‑256 và lưu dưới `cache/llm_responses/`. Lần gọi lại sẽ trả về từ cache mà không cần gọi Gemini, giảm thời gian phản hồi xuống < 0.1 s cho các truy vấn lặp lại.
+- **Fallback model**: mô hình mặc định hiện tại là `gemini-1.5-flash` (nhẹ, nhanh). Khi mô hình này trả lỗi tạm thời (503/429), client tự chuyển sang `gemini-3.8-flash` để đảm bảo khả năng phục hồi.
+- **Retry**: số lần retry tối đa đã giảm còn **1** (được cấu hình trong `GeminiClient.generate`). Các lỗi tạm thời vẫn có exponential back‑off + jitter.
+- **Log latency**: các log INFO cho cache hit/miss và thời gian gọi API được ghi vào stdout, giúp đo lường hiệu suất.
+
+Tiếp theo, thực hiện các bước cài đặt cơ bản:
+
+```powershell
+cd "D:\\Project _Lab_Doc\\DA\\DACS4"
+python -m pip install -r requirements.txt
+```
+
+...
+
 Mở Terminal tại thư mục gốc của dự án:
 
 ```powershell
