@@ -1,6 +1,10 @@
-# Olist Star Schema
+# ⭐ Lược đồ Star Schema — Olist Analytics (`olist_analytics.duckdb`)
 
-The fact table grain is one row per order item. Measures are stored in `fact_orders`, while descriptive attributes are stored in dimension tables.
+Lược đồ Star Schema thiết kế cho bài toán phân tích dữ liệu thương mại điện tử Olist trong DuckDB. Bảng sự kiện `fact_orders` có độ chi tiết (**grain**) ở mức **một dòng trên mỗi mặt hàng trong đơn hàng** (`order_item`), lưu các đại lượng đo lường và liên kết tới các bảng chiều (`dim_*`).
+
+---
+
+## Sơ đồ Thực thể – Quan hệ (ERD)
 
 ```mermaid
 erDiagram
@@ -21,6 +25,9 @@ erDiagram
         int product_key PK
         string product_id
         string product_category_name_english
+        int product_name_length
+        int product_description_length
+        int product_photos_qty
         double product_weight_g
         double product_length_cm
         double product_height_cm
@@ -42,7 +49,18 @@ erDiagram
         int quarter
         int month
         string month_name
+        int day
+        int day_of_week
+        string day_name
         boolean is_weekend
+    }
+
+    DIM_GEOLOCATION {
+        int geolocation_zip_code_prefix
+        double geolocation_lat
+        double geolocation_lng
+        string geolocation_city
+        string geolocation_state
     }
 
     FACT_ORDERS {
@@ -61,11 +79,17 @@ erDiagram
     }
 ```
 
-## Database validation
+> **Ghi chú:** `dim_geolocation` có thể kết nối bổ sung qua mã vùng bưu chính (`geolocation_zip_code_prefix` ↔ `seller_zip_code_prefix`) khi phân tích bản đồ tọa độ địa lý (`lat` / `lng`).
 
-- `fact_orders`: 112,650 rows
-- `dim_customers`: 99,441 rows
-- `dim_products`: 32,951 rows
-- `dim_sellers`: 3,095 rows
-- `dim_date`: 1,461 rows
-- `dim_geolocation`: 19,015 rows
+---
+
+## Kiểm chứng dữ liệu thực tế trong DuckDB
+
+| Bảng | Loại | Số dòng | Vai trò chính |
+|---|---|---:|---|
+| `fact_orders` | **FACT** | `112,650` | Giao dịch đơn hàng/sản phẩm, giá, cước vận chuyển, thanh toán, điểm đánh giá, số ngày giao |
+| `dim_customers` | **DIMENSION** | `99,441` | Thông tin định danh và vị trí (thành phố, bang) của khách hàng |
+| `dim_products` | **DIMENSION** | `32,951` | Danh mục sản phẩm (đã dịch tiếng Anh) và kích thước/khối lượng |
+| `dim_sellers` | **DIMENSION** | `3,095` | Thông tin định danh và vị trí (thành phố, bang, mã vùng) của người bán |
+| `dim_date` | **DIMENSION** | `1,461` | Chuỗi lịch ngày (`2016-01-01` → `2019-12-31`), năm, quý, tháng, thứ, cuối tuần |
+| `dim_geolocation` | **DIMENSION** | `19,015` | Tọa độ vĩ độ/kinh độ theo mã vùng bưu chính Brazil |

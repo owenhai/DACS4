@@ -1,14 +1,22 @@
 # === Biến môi trường (chứa API key, không được commit) ===
 .env
 
-# === Dữ liệu thô từ Kaggle (tải lại được, không cần lưu trong git) ===
+# === Dữ liệu thô từ Kaggle & dữ liệu đã xử lý Parquet (tải/tạo lại được từ ETL) ===
 data/raw/
+data/processed/*.parquet
 
-# === File cơ sở dữ liệu DuckDB (tạo lại được từ ETL pipeline) ===
+# === File cơ sở dữ liệu DuckDB & lịch sử SQLite ===
+data/*.duckdb
 data/database/*.duckdb
+data/database/*.db
 
-# === Python cache ===
+# === Cache LLM phản hồi trên đĩa & log ===
+cache/
+*.log
+
+# === Python & Pytest cache ===
 __pycache__/
+.pytest_cache/
 *.pyc
 *.pyo
 *.pyd

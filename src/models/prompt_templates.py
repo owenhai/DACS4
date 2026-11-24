@@ -345,33 +345,49 @@ def build_insight_prompt(
     sql_query: str,
     query_result_preview: str,
     row_count: int,
+    statistics_text: str | None = None,
 ) -> str:
     """Xây dựng prompt để sinh nhận xét insight từ kết quả query.
 
-    Sẽ được sử dụng đầy đủ ở Tuần 4, nhưng chuẩn bị sẵn ở đây.
+    Các con số thống kê được tính sẵn bằng pandas (``statistics_text``) để
+    LLM chỉ diễn đạt lại, hạn chế tự tính toán sai hoặc bịa số liệu.
 
     Args:
         user_question: Câu hỏi gốc.
         sql_query: SQL đã chạy.
         query_result_preview: Vài dòng đầu của kết quả (dạng text/markdown).
         row_count: Tổng số dòng kết quả.
+        statistics_text: Thống kê đã tính sẵn (tổng, TB, xu hướng, outlier...).
 
     Returns:
         Prompt cho Insight Generation.
     """
     sections: list[str] = [
-        "You are a data analyst. Based on the query results below, write a brief",
-        "insight summary in Vietnamese (2-3 sentences). Focus on key trends,",
-        "notable patterns, and actionable observations.",
+        "You are a senior data analyst for a Brazilian e-commerce company (Olist).",
+        "Write 3-5 concise insight bullet points in Vietnamese that answer the user's",
+        "question based ONLY on the data below.",
+        "",
+        "Rules:",
+        "- Each bullet starts with '- ' and is one sentence.",
+        "- Use ONLY numbers that appear in the statistics or result preview. Do NOT",
+        "  calculate new numbers and do NOT invent data.",
+        "- Mention the most important finding first (top/bottom, trend, share).",
+        "- Point out notable outliers or comparisons if present.",
+        "- Format large numbers with thousand separators (e.g. 1.234.567).",
+        "- No introduction, no conclusion, no markdown headers.",
         "",
         f"User Question: {user_question}",
         f"SQL Query: {sql_query}",
         f"Total rows: {row_count}",
+    ]
+    if statistics_text:
+        sections += ["", "Pre-computed statistics:", statistics_text]
+    sections += [
         "",
         "Query Results (preview):",
         query_result_preview,
         "",
-        "Write your insight in Vietnamese:",
+        "Insights (Vietnamese bullet points):",
     ]
 
     return "\n".join(sections)

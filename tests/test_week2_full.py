@@ -83,7 +83,10 @@ def test_generate_sql_structure(pipeline: TextToSQLPipeline):
     except Exception as exc:  # noqa: BLE001
         # Expected when the API key is absent or the model is unavailable.
         # Accept both missing‑key and model‑not‑found messages.
-        assert "GEMINI_API_KEY" in str(exc) or "not found" in str(exc)
+        msg = str(exc)
+        if "503" in msg or "UNAVAILABLE" in msg or "429" in msg:
+            pytest.skip(f"Gemini tạm thời quá tải: {msg[:80]}")
+        assert "GEMINI_API_KEY" in msg or "not found" in msg
         pytest.skip("Gemini API key not configured or model unavailable – cannot generate SQL.")
     else:
         assert isinstance(sql, str)
